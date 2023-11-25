@@ -17,12 +17,16 @@ function App() {
 
 
   const requestGeoLocation = async () =>{
-    const use = user_location ? user_location : loc_const
+    try {
+      const use = user_location ? user_location : loc_const
     const response = await axios.get(`http://api.openweathermap.org/geo/1.0/direct?q=${use}&limit=1&appid=${API_KEY}`)
     setLocation(response.data)
     setLon(response.data[0].lon)
     setLat(response.data[0].lat)
     return response.data
+    } catch (error) {
+      setError(error?.message)
+    }
   }
 
 
@@ -34,10 +38,14 @@ function App() {
   },[user_location])
 
     const requestWeatherData = async () =>{
-    if(lat && lon){
+    try {
+      if(lat && lon){
       const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}`)
       setData(response.data)
     return response.data
+    }
+    } catch (error) {
+      setError(error?.message)
     }
   }
 
@@ -55,9 +63,6 @@ if(result){
     setError(error)
 
   },[location])
-
-
-console.log(data_result)
 
 
   if(loading){
@@ -80,7 +85,9 @@ console.log(data_result)
       }} />
       
     </form>
-    {data_result !== '' ? <div className="xs:px-2">
+    {error ? <>
+    <div className="flex-1 items-center justify-center text-red-800 text-bold capitalized">{error}</div>
+    </> : <>{data_result !== '' ? <div className="xs:px-2">
     <div className="py-4 container mx-auto">
       <h2 className="text-gray-600 text-[26px] font-semibold capitalize">Current Weather Results = {location[0]?.name}</h2>
     </div>
@@ -89,7 +96,7 @@ console.log(data_result)
       {data_result?.weather?.map(item=>{
         return (
           <>
-          <h2 className="text-black">Main => {item.main}</h2>
+          <h2 className="text-black">Main = {item.main}</h2>
       <h2>Description = {item.description}</h2></>
         )
       })}
@@ -114,7 +121,7 @@ console.log(data_result)
     <div className="py-4 container mx-auto">
       <h2 className="text-gray-600 text-[26px] font-semibold capitalize">No Current Weather Results</h2>
     </div></>}
-
+</>}
    </div>
   );
 }
